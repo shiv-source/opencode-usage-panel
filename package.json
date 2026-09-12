@@ -6,11 +6,11 @@
   "author": "shiv kumar",
   "repository": {
     "type": "git",
-    "url": "https://github.com/shiv-source/opencode-usage-plugin"
+    "url": "https://github.com/shiv-source/opencode-usage-panel"
   },
-  "homepage": "https://github.com/shiv-source/opencode-usage-plugin",
+  "homepage": "https://github.com/shiv-source/opencode-usage-panel",
   "bugs": {
-    "url": "https://github.com/shiv-source/opencode-usage-plugin/issues"
+    "url": "https://github.com/shiv-source/opencode-usage-panel/issues"
   },
   "type": "module",
   "license": "MIT",

@@ -48,7 +48,7 @@ straight at the source with an absolute path (or a `file://` URL):
 ```jsonc
 {
   "$schema": "https://opencode.ai/tui.json",
-  "plugin": ["/Users/you/opencode-usage-plugin/src/index.tsx"]
+  "plugin": ["/Users/you/opencode-usage-panel/src/index.tsx"]
 }
 ```
 
