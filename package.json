@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
   "name": "opencode-usage-panel",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Sidebar token-usage and cost panel for the opencode TUI. Breaks a session down by model with per-model cost, context usage, and configurable peak/off-peak pricing.",
   "author": "shiv kumar",
   "repository": {
@@ -15,13 +15,21 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
   },
+  "main": "./dist/tui.js",
   "exports": {
-    "./tui": "./src/index.tsx"
+    ".": {
+      "import": "./dist/tui.js"
+    },
+    "./tui": {
+      "import": "./dist/tui.js"
+    }
   },
   "files": [
-    "src",
+    "dist",
     "README.md",
     "LICENSE"
   ],
@@ -43,6 +51,8 @@
     "@opencode-ai/plugin": "^1.18.30",
     "@opentui/core": "^0.5.11",
     "@opentui/solid": "^0.5.11",
+    "esbuild": "^0.28.2",
+    "esbuild-plugin-solid": "^0.6.0",
     "solid-js": "^1.9.12",
     "typescript": "^5.9.3"
   },

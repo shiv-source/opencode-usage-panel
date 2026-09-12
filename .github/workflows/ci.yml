@@ -32,3 +32,4 @@ jobs:
           cache: npm # Reuse the npm download cache across runs
       - run: npm ci # Reproducible install from the lockfile
       - run: npm run typecheck
+      - run: npm run build # Ensure the published bundle compiles
