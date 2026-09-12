@@ -51,7 +51,13 @@ export function read(
   api: TuiPluginApi,
   sessionID: string,
   options: Record<string, unknown> | undefined,
-): { models: Usage[]; cost: number; surcharge: number; context: { tokens: number; percent: number | null } } {
+): {
+  models: Usage[]
+  cost: number
+  surcharge: number
+  hasPeak: boolean
+  context: { tokens: number; percent: number | null }
+} {
   const config = readConfig(options)
   const buckets = new Map<string, Bucket>()
   let surcharge = 0
@@ -99,6 +105,7 @@ export function read(
       key: bucket.key,
       name: bucket.name,
       known: bucket.known,
+      peak: bucket.peak !== undefined,
       cost: bucket.cost,
       tokens: total(bucket.tokens),
       rows: [
@@ -115,6 +122,7 @@ export function read(
     models,
     cost: models.reduce((sum, model) => sum + model.cost, 0),
     surcharge,
+    hasPeak: models.some((model) => model.peak),
     context: contextOf(api, sessionID),
   }
 }

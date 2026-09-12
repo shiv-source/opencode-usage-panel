@@ -108,10 +108,10 @@ windows. A model without `peak` has flat pricing.
 
 ### Peak windows
 
-`peakHours` lists the UTC intervals where `peak` rates apply. Windows may wrap
-past midnight, and `days` restricts them to weekdays (`mon`..`sun`, JS-style
-`0`..`6` also accepted; omit for every day). DeepSeek's schedule — weekdays
-`01:00-04:00` and `06:00-10:00` UTC — is:
+`peakHours` is always specified in **UTC**, since that is how providers publish
+their schedules. Windows may wrap past midnight, and `days` restricts them to
+UTC weekdays (`mon`..`sun`, JS-style `0`..`6` also accepted; omit for every
+day). DeepSeek's schedule — weekdays `01:00-04:00` and `06:00-10:00` UTC — is:
 
 ```jsonc
 {
@@ -122,7 +122,14 @@ past midnight, and `days` restricts them to weekdays (`mon`..`sun`, JS-style
 }
 ```
 
-The extra cost paid for peak messages is shown under `Spent`.
+Messages are matched against these windows in UTC, so the result is correct
+whatever your machine's timezone is. For display, times are converted to your
+local timezone by default (`IST` for `Asia/Kolkata`); set `"timezone": "utc"` to
+render them in UTC instead.
+
+The extra cost paid for peak messages is shown under `Spent`. While a peak
+window is active the panel shows a `▲ peak` badge next to affected models and
+the time the window ends; otherwise it lists the configured peak windows.
 
 ## License
 

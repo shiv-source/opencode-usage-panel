@@ -22,7 +22,11 @@ function parseDays(value: unknown): Set<number> | undefined {
 }
 
 export function readConfig(options: Record<string, unknown> | undefined): Config {
-  const raw = (options ?? {}) as { pricing?: Record<string, ModelPrice>; peakHours?: unknown }
+  const raw = (options ?? {}) as {
+    pricing?: Record<string, ModelPrice>
+    peakHours?: unknown
+    timezone?: unknown
+  }
   const pricing = raw.pricing ?? {}
   const windows: Window[] = Array.isArray(raw.peakHours)
     ? raw.peakHours.map((item) => {
@@ -34,7 +38,7 @@ export function readConfig(options: Record<string, unknown> | undefined): Config
         }
       })
     : []
-  return { pricing, windows }
+  return { pricing, windows, timezone: raw.timezone === "utc" ? "utc" : "local" }
 }
 
 const MINUTE = 60_000
@@ -48,14 +52,17 @@ function utcMinutes(time: number): number {
   return Math.floor((((time % DAY) + DAY) % DAY) / MINUTE)
 }
 
-export function isPeak(config: Config, time: number): boolean {
-  if (config.windows.length === 0) return false
+export function peakWindow(config: Config, time: number): Window | undefined {
   const day = utcDay(time)
   const minutes = utcMinutes(time)
-  return config.windows.some((window) => {
+  return config.windows.find((window) => {
     if (window.days && !window.days.has(day)) return false
     return window.start <= window.end
       ? minutes >= window.start && minutes < window.end
       : minutes >= window.start || minutes < window.end
   })
+}
+
+export function isPeak(config: Config, time: number): boolean {
+  return peakWindow(config, time) !== undefined
 }

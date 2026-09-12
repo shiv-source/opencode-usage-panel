@@ -22,6 +22,7 @@ export type Window = {
 export type Config = {
   pricing: Record<string, ModelPrice>
   windows: Window[]
+  timezone: "local" | "utc"
 }
 
 export type Row = {
@@ -34,6 +35,7 @@ export type Usage = {
   key: string
   name: string
   known: boolean
+  peak: boolean
   cost: number
   tokens: number
   rows: Row[]
