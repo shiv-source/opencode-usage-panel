@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "opencode-usage-plugin",
+  "version": "0.1.0",
+  "description": "Sidebar token-usage and cost panel for the opencode TUI.",
+  "type": "module",
+  "license": "MIT",
+  "exports": {
+    "./tui": "./tui.tsx"
+  },
+  "files": [
+    "tui.tsx",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "tui",
+    "tokens",
+    "usage",
+    "cost"
+  ],
+  "peerDependencies": {
+    "@opencode-ai/plugin": ">=1.18.0",
+    "@opentui/core": ">=0.4.5",
+    "@opentui/solid": ">=0.4.5",
+    "solid-js": "*"
+  },
+  "engines": {
+    "opencode": ">=1.18.0"
+  }
+}
