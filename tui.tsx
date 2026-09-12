@@ -30,7 +30,7 @@ function read(api: TuiPluginApi, sessionID: string): Usage {
     { label: "reasoning", value: last.tokens.reasoning },
     { label: "cache read", value: last.tokens.cache.read },
     { label: "cache write", value: last.tokens.cache.write },
-  ].filter((row) => row.value > 0)
+  ]
 
   const total = rows.reduce((sum, row) => sum + row.value, 0)
   return { rows, total, limit: model?.limit.context }

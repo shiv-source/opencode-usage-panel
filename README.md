@@ -14,8 +14,8 @@ $0.00 spent
 ```
 
 Each row is right-aligned into a value column with its share of the model's
-context window. Only non-zero counters are shown, so a session that never hits
-the prompt cache stays short.
+context window. All five counters are shown, including the ones a turn reports
+as zero, so the rows keep a stable order.
 
 ## Requirements
 
