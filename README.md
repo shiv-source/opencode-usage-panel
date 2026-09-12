@@ -1,5 +1,7 @@
 # opencode-usage-panel
 
+[![npm version](https://img.shields.io/npm/v/opencode-usage-panel.svg)](https://www.npmjs.com/package/opencode-usage-panel)
+
 A sidebar panel for the [opencode](https://opencode.ai) TUI that breaks a
 session down by model: how many tokens each one consumed and what it cost.
 
@@ -28,8 +30,17 @@ context panel uses.
 
 ### From npm
 
-opencode installs npm plugins on startup, so you only need to list it. Add the
-package to `tui.json`:
+Available on npm: [opencode-usage-panel](https://www.npmjs.com/package/opencode-usage-panel).
+
+Install it with the CLI:
+
+```sh
+opencode plugin opencode-usage-panel --global
+```
+
+Or add the package to `tui.json` yourself — opencode installs npm plugins on
+startup. Use `.opencode/tui.json` (project) or `~/.config/opencode/tui.json`
+(global):
 
 ```jsonc
 {
@@ -37,8 +48,6 @@ package to `tui.json`:
   "plugin": ["opencode-usage-panel"]
 }
 ```
-
-Or let the CLI do it: `opencode plugin opencode-usage-panel --global`.
 
 ### From a local checkout
 
