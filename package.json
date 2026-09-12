@@ -3,8 +3,20 @@
   "name": "opencode-usage-plugin",
   "version": "0.1.0",
   "description": "Sidebar token-usage and cost panel for the opencode TUI.",
+  "author": "shiv kumar",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shiv-source/opencode-usage-plugin"
+  },
+  "homepage": "https://github.com/shiv-source/opencode-usage-plugin",
+  "bugs": {
+    "url": "https://github.com/shiv-source/opencode-usage-plugin/issues"
+  },
   "type": "module",
   "license": "MIT",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
   "exports": {
     "./tui": "./src/index.tsx"
   },
