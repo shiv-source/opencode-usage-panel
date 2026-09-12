@@ -1,21 +1,18 @@
 # opencode-usage-plugin
 
-A sidebar panel for the [opencode](https://opencode.ai) TUI that shows the token
-usage and cost of the current session.
+A sidebar panel for the [opencode](https://opencode.ai) TUI that breaks a
+session down by model: how many tokens each one consumed and what it cost.
 
-```
-Context
-16,150 tokens     2%
-input           240  0%
-output           88  0%
-reasoning       206  0%
-cache read   15,616  2%
-$0.00 spent
-```
+![opencode-usage-plugin sidebar](./screenshots/image.png)
 
-Each row is right-aligned into a value column with its share of the model's
-context window. All five counters are shown, including the ones a turn reports
-as zero, so the rows keep a stable order.
+The `Context` block mirrors opencode's built-in panel — the token count and
+share of the context window for the latest assistant turn — but leaves out its
+cost, which does not account for peak pricing.
+
+Each model gets a header row with its estimated cost, then the `input`
+(cache miss), `output`, `reasoning`, and `cache read` (cache hit) counters
+summed over the session. The percentage on each row is that counter's share of
+the model's own total tokens.
 
 ## Requirements
 
@@ -27,19 +24,36 @@ context panel uses.
 
 ## Install
 
-### From a file
+### From npm
 
-Copy `tui.tsx` into your opencode plugin directory and register it in
-`tui.json`:
+opencode installs npm plugins on startup, so you only need to list it. Add the
+package to `tui.json`:
 
 ```jsonc
 {
   "$schema": "https://opencode.ai/tui.json",
-  "plugin": ["./plugins/tui.tsx"]
+  "plugin": ["opencode-usage-plugin"]
 }
 ```
 
-Then disable the built-in panel so the two do not stack:
+Or let the CLI do it: `opencode plugin opencode-usage-plugin --global`.
+
+### From a local checkout
+
+There's no need to copy the file into a plugin directory. Point `tui.json`
+straight at the source with an absolute path (or a `file://` URL):
+
+```jsonc
+{
+  "$schema": "https://opencode.ai/tui.json",
+  "plugin": ["/Users/you/opencode-usage-plugin/src/index.tsx"]
+}
+```
+
+### Disable the built-in panel
+
+The plugin renders into the same slot as opencode's built-in context panel, so
+turn that one off to avoid stacking:
 
 ```jsonc
 {
@@ -49,29 +63,64 @@ Then disable the built-in panel so the two do not stack:
 }
 ```
 
-Relative paths in `tui.json` resolve from the config file that declares them, so
-`./plugins/tui.tsx` means `~/.config/opencode/plugins/tui.tsx` for a global
-config.
+## Pricing
 
-### As a package
+Cost is computed per message from a rate table, so peak/off-peak pricing is
+honoured using each message's own timestamp. Models without a configured rate
+table fall back to the `cost` opencode records, which is priced automatically
+from [models.dev](https://models.dev) (free tiers show `—`).
 
-The package exposes a `./tui` entrypoint, so it can be configured by spec:
+### Rate tables
+
+Prices are US dollars per million tokens. `input` is cache-miss input,
+`cacheRead` is cache-hit input, and `output` also covers `reasoning` unless a
+separate `reasoning` rate is given.
 
 ```jsonc
 {
-  "plugin": ["opencode-usage-plugin"]
+  "plugin": [
+    [
+      "opencode-usage-plugin",
+      {
+        "pricing": {
+          "deepseek-flash": {
+            "input": 0.15,
+            "output": 0.6,
+            "cacheRead": 0.003,
+            "peak": {
+              "input": 0.3,
+              "output": 1.2,
+              "cacheRead": 0.006
+            }
+          }
+        }
+      }
+    ]
+  ]
 }
 ```
 
-Install it into the config scope with `opencode plugin opencode-usage-plugin`
-(add `--global` for the global config).
+Keys can be a bare `modelID` or `providerID/modelID`. Top-level rates apply
+outside peak windows; the optional `peak` block replaces them inside peak
+windows. A model without `peak` has flat pricing.
 
-## How it reads usage
+### Peak windows
 
-The panel takes the most recent assistant message that produced output and sums
-its `input`, `output`, `reasoning`, `cache.read`, and `cache.write` token
-counters reported by the provider. The percentage is each count against the
-model's context limit; cost is the session total that opencode tracks.
+`peakHours` lists the UTC intervals where `peak` rates apply. Windows may wrap
+past midnight, and `days` restricts them to weekdays (`mon`..`sun`, JS-style
+`0`..`6` also accepted; omit for every day). DeepSeek's schedule — weekdays
+`01:00-04:00` and `06:00-10:00` UTC — is:
+
+```jsonc
+{
+  "peakHours": [
+    { "start": "01:00", "end": "04:00", "days": ["mon", "tue", "wed", "thu", "fri"] },
+    { "start": "06:00", "end": "10:00", "days": ["mon", "tue", "wed", "thu", "fri"] }
+  ]
+}
+```
+
+The extra cost paid for peak messages is shown under `Spent`.
 
 ## License
 
