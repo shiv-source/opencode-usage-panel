@@ -1,10 +1,10 @@
-# opencode-usage-plugin
+# opencode-usage-panel
 
 A sidebar panel for the [opencode](https://opencode.ai) TUI that breaks a
 session down by model: how many tokens each one consumed and what it cost.
 
 <p align="center">
-  <img src="./screenshots/image.png" alt="opencode-usage-plugin sidebar" width="320" />
+  <img src="./screenshots/image.png" alt="opencode-usage-panel sidebar" width="320" />
 </p>
 
 The `Context` block mirrors opencode's built-in panel — the token count and
@@ -34,11 +34,11 @@ package to `tui.json`:
 ```jsonc
 {
   "$schema": "https://opencode.ai/tui.json",
-  "plugin": ["opencode-usage-plugin"]
+  "plugin": ["opencode-usage-panel"]
 }
 ```
 
-Or let the CLI do it: `opencode plugin opencode-usage-plugin --global`.
+Or let the CLI do it: `opencode plugin opencode-usage-panel --global`.
 
 ### From a local checkout
 
@@ -82,7 +82,7 @@ separate `reasoning` rate is given.
 {
   "plugin": [
     [
-      "opencode-usage-plugin",
+      "opencode-usage-panel",
       {
         "pricing": {
           "deepseek-flash": {

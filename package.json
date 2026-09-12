@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "name": "opencode-usage-plugin",
+  "name": "opencode-usage-panel",
   "version": "0.1.0",
   "description": "Sidebar token-usage and cost panel for the opencode TUI. Breaks a session down by model with per-model cost, context usage, and configurable peak/off-peak pricing.",
   "author": "shiv kumar",
