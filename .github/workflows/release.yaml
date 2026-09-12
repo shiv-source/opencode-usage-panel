@@ -31,7 +31,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           # rc tags become GitHub prereleases; stable tags become full releases.
-          if [ "$PRERELEASE" = "true" ]; then
+          # Skip if the release already exists so reruns stay idempotent.
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "Release $GITHUB_REF_NAME already exists"
+          elif [ "$PRERELEASE" = "true" ]; then
             gh release create "$GITHUB_REF_NAME" --generate-notes --verify-tag --prerelease
           else
             gh release create "$GITHUB_REF_NAME" --generate-notes --verify-tag
@@ -41,8 +44,9 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           # rc tags publish under the "next" dist-tag, stable tags under "latest".
+          # --access public is required for provenance on a new package.
           if [ "$PRERELEASE" = "true" ]; then
-            npm publish --provenance --tag next
+            npm publish --provenance --access public --tag next
           else
-            npm publish --provenance
+            npm publish --provenance --access public
           fi
