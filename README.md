@@ -3,7 +3,9 @@
 A sidebar panel for the [opencode](https://opencode.ai) TUI that breaks a
 session down by model: how many tokens each one consumed and what it cost.
 
-![opencode-usage-plugin sidebar](./screenshots/image.png)
+<p align="center">
+  <img src="./screenshots/image.png" alt="opencode-usage-plugin sidebar" width="320" />
+</p>
 
 The `Context` block mirrors opencode's built-in panel — the token count and
 share of the context window for the latest assistant turn — but leaves out its
