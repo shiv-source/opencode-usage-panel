@@ -1,0 +1,10 @@
+# Belts-and-braces: the files[] field in package.json is the publish allowlist.
+# A root .npmignore does not override files[], so this only takes effect if
+# files[] is ever removed.
+src/
+scripts/
+.github/
+screenshots/
+tsconfig.json
+.gitignore
+*.log
