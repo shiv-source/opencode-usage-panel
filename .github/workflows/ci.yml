@@ -1,14 +1,16 @@
 name: CI
 
 on:
+  # Type-check pushes to main, but only when relevant files change.
   push:
     branches: [main]
     paths:
-      - "**/*.ts"
+      - "**/*.ts" # Source
       - "**/*.tsx"
-      - ".github/workflows/**"
-      - "package.json"
+      - ".github/workflows/**" # Workflow changes
+      - "package.json" # Dependency/script changes
       - "package-lock.json"
+  # Same checks for pull requests targeting main.
   pull_request:
     branches: [main]
     paths:
@@ -23,10 +25,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.0.0
         with:
           node-version: 24
-          cache: npm
-      - run: npm ci
+          cache: npm # Reuse the npm download cache across runs
+      - run: npm ci # Reproducible install from the lockfile
       - run: npm run typecheck
