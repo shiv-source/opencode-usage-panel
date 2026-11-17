@@ -1,5 +1,5 @@
-import type { AssistantMessage } from "@opencode-ai/sdk/v2"
-import type { TuiPluginApi } from "@opencode-ai/plugin/tui"
+import type { SessionMessageAssistant, SessionMessageInfo, TokenUsageInfo } from "@opencode/client"
+import type { Context } from "@opencode/plugin/tui/context"
 import { isPeak, readConfig } from "./config"
 import { share } from "./format"
 import { costOf, ratesFor } from "./pricing"
@@ -14,7 +14,7 @@ const FIELDS: Array<[keyof Counts, string]> = [
   ["cacheRead", "cache read"],
 ]
 
-function counts(tokens: AssistantMessage["tokens"]): Counts {
+function counts(tokens: TokenUsageInfo): Counts {
   return {
     input: tokens.input,
     output: tokens.output,
@@ -36,19 +36,25 @@ function total(value: Counts): number {
   return value.input + value.output + value.reasoning + value.cacheRead
 }
 
-function contextOf(api: TuiPluginApi, sessionID: string): { tokens: number; percent: number | null } {
-  const last = api.state.session.messages(sessionID).findLast(
-    (item): item is AssistantMessage => item.role === "assistant" && item.tokens.output > 0,
-  )
+function isAssistantWithOutput(
+  m: SessionMessageInfo,
+): m is SessionMessageAssistant & { tokens: NonNullable<SessionMessageAssistant["tokens"]> } {
+  return m.type === "assistant" && (m.tokens?.output ?? 0) > 0
+}
+
+function contextOf(context: Context, sessionID: string): { tokens: number; percent: number | null } {
+  const last = context.data.session.message.list(sessionID).findLast(isAssistantWithOutput)
   if (!last) return { tokens: 0, percent: null }
   const tokens =
     last.tokens.input + last.tokens.output + last.tokens.reasoning + last.tokens.cache.read + last.tokens.cache.write
-  const model = api.state.provider.find((item) => item.id === last.providerID)?.models[last.modelID]
+  const location = context.location ?? context.data.location.default()
+  const models = context.data.location.model.list(location) ?? []
+  const model = models.find((item) => item.providerID === last.model.providerID && item.modelID === last.model.id)
   return { tokens, percent: model?.limit.context ? Math.round((tokens / model.limit.context) * 100) : null }
 }
 
 export function read(
-  api: TuiPluginApi,
+  context: Context,
   sessionID: string,
   options: Record<string, unknown> | undefined,
 ): {
@@ -62,15 +68,16 @@ export function read(
   const buckets = new Map<string, Bucket>()
   let surcharge = 0
 
-  for (const message of api.state.session.messages(sessionID)) {
-    if (message.role !== "assistant") continue
+  for (const message of context.data.session.message.list(sessionID)) {
+    if (message.type !== "assistant") continue
+    if (!message.tokens) continue
     const value = counts(message.tokens)
     if (total(value) === 0) continue
 
-    const key = `${message.providerID}/${message.modelID}`
+    const key = `${message.model.providerID}/${message.model.id}`
     let bucket = buckets.get(key)
     if (!bucket) {
-      const info = ratesFor(api, message.providerID, message.modelID, config)
+      const info = ratesFor(context, message.model.providerID, message.model.id, config)
       bucket = {
         key,
         name: info.name,
@@ -93,10 +100,10 @@ export function read(
       bucket.cost += actual
       if (onPeak) surcharge += actual - costOf(value, bucket.off)
     } else {
-      bucket.cost += message.cost
+      bucket.cost += message.cost ?? 0
     }
 
-    if (bucket.explicit || message.cost > 0) bucket.known = true
+    if (bucket.explicit || (message.cost ?? 0) > 0) bucket.known = true
   }
 
   const models = [...buckets.values()]
@@ -123,6 +130,6 @@ export function read(
     cost: models.reduce((sum, model) => sum + model.cost, 0),
     surcharge,
     hasPeak: models.some((model) => model.peak),
-    context: contextOf(api, sessionID),
+    context: contextOf(context, sessionID),
   }
 }

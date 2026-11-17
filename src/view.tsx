@@ -1,6 +1,6 @@
 /** @jsxImportSource @opentui/solid */
 import { createMemo, createSignal, onCleanup } from "solid-js"
-import type { TuiPluginApi } from "@opencode-ai/plugin/tui"
+import { usePlugin } from "@opencode/plugin/tui"
 import { isPeak, peakWindow, readConfig } from "./config"
 import { formatClock, formatCost, timezoneLabel, utcOffsetMinutes } from "./format"
 import { read } from "./usage"
@@ -38,16 +38,16 @@ function localDays(window: Window, offset: number): Set<number> | undefined {
   return days
 }
 
-export function View(props: { api: TuiPluginApi; sessionID: string; options: Record<string, unknown> | undefined }) {
+export function UsagePanel(props: { sessionID: string }) {
+  const context = usePlugin()
   const [now, setNow] = createSignal(Date.now())
-  if (readConfig(props.options).windows.length > 0) {
+  if (readConfig(context.options).windows.length > 0) {
     const timer = timers.setInterval(() => setNow(Date.now()), 60_000)
     onCleanup(() => timers.clearInterval(timer))
   }
 
-  const theme = () => props.api.theme.current
-  const config = createMemo(() => readConfig(props.options))
-  const state = createMemo(() => read(props.api, props.sessionID, props.options))
+  const config = createMemo(() => readConfig(context.options))
+  const state = createMemo(() => read(context, props.sessionID, context.options))
   const peakNow = createMemo(() => isPeak(config(), now()))
   const activePeak = createMemo(() => peakWindow(config(), now()))
   const peakPriced = createMemo(() => state().hasPeak && config().windows.length > 0)
@@ -86,39 +86,41 @@ export function View(props: { api: TuiPluginApi; sessionID: string; options: Rec
   return (
     <box flexDirection="column" width="100%">
       <box flexDirection="row" justifyContent="space-between" width="100%">
-        <text fg={theme().text}>
+        <text fg={context.theme.text.base}>
           <b>Tokens Usage</b>
         </text>
         {peakPriced() && (
-          <text fg={peakNow() ? theme().warning : theme().success}>{peakNow() ? "▲ peak" : "off-peak"}</text>
+          <text fg={peakNow() ? context.theme.text.feedback.warning.base : context.theme.text.feedback.success.base}>
+            {peakNow() ? "▲ peak" : "off-peak"}
+          </text>
         )}
       </box>
       <box flexDirection="column" width="100%" marginTop={1}>
-        <text fg={theme().textMuted}>Context</text>
+        <text fg={context.theme.text.muted}>Context</text>
         <box flexDirection="row" justifyContent="space-between" width="100%">
-          <text fg={theme().text}>{state().context.tokens.toLocaleString()} tokens</text>
-          <text fg={theme().textMuted}>{state().context.percent ?? 0}% used</text>
+          <text fg={context.theme.text.base}>{state().context.tokens.toLocaleString()} tokens</text>
+          <text fg={context.theme.text.muted}>{state().context.percent ?? 0}% used</text>
         </box>
       </box>
       {state().models.map((model) => (
         <box flexDirection="column" width="100%" marginTop={1}>
           <box flexDirection="row" justifyContent="space-between" width="100%">
-            <text fg={theme().primary}>
+            <text fg={context.theme.text.action.primary.base}>
               <b>{model.name}</b>
             </text>
             <box flexDirection="row" gap={1}>
-              {model.peak && peakNow() && <text fg={theme().warning}>▲ peak</text>}
-              <text fg={model.known ? theme().text : theme().textMuted}>
+              {model.peak && peakNow() && <text fg={context.theme.text.feedback.warning.base}>▲ peak</text>}
+              <text fg={model.known ? context.theme.text.base : context.theme.text.muted}>
                 {model.known ? formatCost(model.cost) : "—"}
               </text>
             </box>
           </box>
           {model.rows.map((row) => (
             <box flexDirection="row" justifyContent="space-between" width="100%">
-              <text fg={theme().textMuted}>{"  " + row.label}</text>
+              <text fg={context.theme.text.muted}>{"  " + row.label}</text>
               <box flexDirection="row" gap={1}>
-                <text fg={theme().text}>{row.value.toLocaleString().padStart(valueWidth())}</text>
-                <text fg={theme().textMuted}>{row.percent.padStart(percentWidth())}</text>
+                <text fg={context.theme.text.base}>{row.value.toLocaleString().padStart(valueWidth())}</text>
+                <text fg={context.theme.text.muted}>{row.percent.padStart(percentWidth())}</text>
               </box>
             </box>
           ))}
@@ -130,25 +132,25 @@ export function View(props: { api: TuiPluginApi; sessionID: string; options: Rec
         marginTop={1}
         border={["top"]}
         borderStyle="single"
-        borderColor={theme().borderSubtle}
+        borderColor={context.theme.border.base}
       >
         <box flexDirection="row" justifyContent="space-between" width="100%">
-          <text fg={theme().text}>
+          <text fg={context.theme.text.base}>
             <b>Spent</b>
           </text>
-          <text fg={theme().text}>
+          <text fg={context.theme.text.base}>
             <b>{formatCost(state().cost)}</b>
           </text>
         </box>
         {state().surcharge > 0 && (
           <box flexDirection="row" justifyContent="space-between" width="100%">
-            <text fg={theme().textMuted}>peak surcharge</text>
-            <text fg={theme().warning}>+{formatCost(state().surcharge)}</text>
+            <text fg={context.theme.text.muted}>peak surcharge</text>
+            <text fg={context.theme.text.feedback.warning.base}>+{formatCost(state().surcharge)}</text>
           </box>
         )}
       </box>
       {peakPriced() && (
-        <text fg={peakNow() ? theme().warning : theme().textMuted}>
+        <text fg={peakNow() ? context.theme.text.feedback.warning.base : context.theme.text.muted}>
           {peakNow()
             ? `▲ peak hours until ${formatClock((activePeak()?.end ?? 0) + offset())} ${zone()}`
             : schedule()}

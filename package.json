@@ -1,62 +1,38 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
   "name": "opencode-usage-panel",
-  "version": "0.1.1",
+  "version": "2.0.0",
   "description": "Sidebar token-usage and cost panel for the opencode TUI. Breaks a session down by model with per-model cost, context usage, and configurable peak/off-peak pricing.",
-  "author": "shiv kumar",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/shiv-source/opencode-usage-panel.git"
-  },
+  "author": { "name": "shiv kumar" },
+  "contributors": [{ "name": "Andrea Casini" }],
+  "repository": { "type": "git", "url": "git+https://github.com/shiv-source/opencode-usage-panel.git" },
   "homepage": "https://github.com/shiv-source/opencode-usage-panel",
-  "bugs": {
-    "url": "https://github.com/shiv-source/opencode-usage-panel/issues"
-  },
+  "bugs": { "url": "https://github.com/shiv-source/opencode-usage-panel/issues" },
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "build": "node scripts/build.mjs",
-    "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build"
+    "typecheck": "tsc --noEmit"
   },
-  "main": "./dist/tui.js",
   "exports": {
-    ".": {
-      "import": "./dist/tui.js"
-    },
-    "./tui": {
-      "import": "./dist/tui.js"
-    }
+    "./tui": "./src/tui.tsx"
   },
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
-  "keywords": [
-    "opencode",
-    "opencode-plugin",
-    "tui",
-    "tokens",
-    "usage",
-    "cost"
-  ],
+  "files": ["src", "README.md", "LICENSE"],
+  "keywords": ["opencode", "opencode-plugin", "opencode-tui", "tokens", "usage", "cost", "tui"],
   "peerDependencies": {
-    "@opencode-ai/plugin": ">=1.18.0",
-    "@opentui/core": ">=0.4.5",
-    "@opentui/solid": ">=0.4.5",
-    "solid-js": "*"
+    "@opencode/plugin": ">=2.3.0",
+    "@opentui/core": ">=0.8.4",
+    "@opentui/solid": ">=0.8.4",
+    "solid-js": ">=1.9.0"
   },
   "devDependencies": {
-    "@opencode-ai/plugin": "^1.18.30",
-    "@opentui/core": "^0.5.11",
-    "@opentui/solid": "^0.5.11",
-    "esbuild": "^0.28.2",
-    "esbuild-plugin-solid": "^0.6.0",
-    "solid-js": "^1.9.12",
+    "@opencode/client": "2.3.0",
+    "@opencode/plugin": "2.3.0",
+    "@opentui/core": "0.8.4",
+    "@opentui/solid": "0.8.4",
+    "solid-js": "^1.9.17",
     "typescript": "^5.9.3"
   },
   "engines": {
-    "opencode": ">=1.18.0"
+    "opencode": ">=2.3.0"
   }
 }

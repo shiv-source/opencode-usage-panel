@@ -1,5 +1,5 @@
-import type { TuiPluginApi } from "@opencode-ai/plugin/tui"
-import type { Config, Cost, Counts, RateFields, Rates } from "./types"
+import type { Context } from "@opencode/plugin/tui/context"
+import type { Config, Counts, RateFields, Rates } from "./types"
 
 const KEYS: Array<keyof Counts> = ["input", "output", "reasoning", "cacheRead"]
 
@@ -14,18 +14,20 @@ function pick(value: RateFields | undefined): RateFields {
 }
 
 export function ratesFor(
-  api: TuiPluginApi,
+  context: Context,
   providerID: string,
   modelID: string,
   config: Config,
 ): { off: Rates; peak: Rates | undefined; name: string; explicit: boolean } {
-  const model = api.state.provider.find((item) => item.id === providerID)?.models[modelID]
-  const cost = model?.cost as Cost | undefined
+  const location = context.location ?? context.data.location.default()
+  const models = context.data.location.model.list(location) ?? []
+  const model = models.find((item) => item.providerID === providerID && item.modelID === modelID)
+  const cost = model?.cost.find((c) => !c.tier) ?? model?.cost[0]
   const base: Rates = {
     input: cost?.input ?? 0,
     output: cost?.output ?? 0,
-    reasoning: cost?.reasoning ?? cost?.output ?? 0,
-    cacheRead: cost?.cacheRead ?? cost?.cache?.read ?? 0,
+    reasoning: cost?.output ?? 0,
+    cacheRead: cost?.cache?.read ?? 0,
   }
 
   const entry = config.pricing[`${providerID}/${modelID}`] ?? config.pricing[modelID]

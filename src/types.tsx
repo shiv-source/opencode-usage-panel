@@ -1,3 +1,7 @@
+import type { ModelCost } from "@opencode/client"
+
+export type { ModelCost }
+
 export type Counts = {
   input: number
   output: number
@@ -50,12 +54,4 @@ export type Bucket = {
   peak: Rates | undefined
   tokens: Counts
   cost: number
-}
-
-export type Cost = {
-  input: number
-  output: number
-  reasoning?: number
-  cacheRead?: number
-  cache?: { read: number; write: number }
 }
