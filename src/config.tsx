@@ -26,6 +26,7 @@ export function readConfig(options: Record<string, unknown> | undefined): Config
     pricing?: Record<string, ModelPrice>
     peakHours?: unknown
     timezone?: unknown
+    includeSubagents?: unknown
   }
   const pricing = raw.pricing ?? {}
   const windows: Window[] = Array.isArray(raw.peakHours)
@@ -38,7 +39,12 @@ export function readConfig(options: Record<string, unknown> | undefined): Config
         }
       })
     : []
-  return { pricing, windows, timezone: raw.timezone === "utc" ? "utc" : "local" }
+  return {
+    pricing,
+    windows,
+    timezone: raw.timezone === "utc" ? "utc" : "local",
+    includeSubagents: raw.includeSubagents !== false,
+  }
 }
 
 const MINUTE = 60_000
